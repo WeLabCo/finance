@@ -93,7 +93,7 @@ module Finance
     #   @transactions << Transaction.new(  600, :date => Time.new(1995,01,01))
     #   Finance::Cashflow.new(@transactions).xirr(0.6) #=> Rate("0.024851", :apr, :compounds => :annually)
     # @api public
-    def xirr(iterations=100)
+    def xirr(iterations=100, guess = nil)
       # Make sure we have a valid sequence of cash flows.
       positives, negatives = @__cash_flows.partition{ |t| t.amount >= 0 }
       if positives.empty? || negatives.empty?
@@ -101,7 +101,7 @@ module Finance
       end
 
       func = Function.new(@__cash_flows, :xnpv)
-      rate = [ func.one ]
+      rate = guess.nil? ? [ func.one ] : [ guess ]
       nlsolve( func, rate )
       Rate.new(rate[0], :apr, :compounds => :annually)
     end
