@@ -54,7 +54,7 @@ module Finance
       # Make sure we have a valid sequence of cash flows.
       positives, negatives = @__cash_flows.partition{ |i| i >= 0 }
       if positives.empty? || negatives.empty?
-        raise ArgumentError, "Calculation does not converge."
+        raise ArgumentError, "Calculation does not converge. Cashflow needs to have a least one positive and one negative values."
       end
 
       func = Function.new(@__cash_flows, :npv)
