@@ -86,7 +86,7 @@ module Finance
     end
 
     # calculate the internal rate of return for a sequence of cash flows with dates
-    # @param [Numeric] iterations: default to 100; [Numeric] Initial guess rate
+    # @param[Numeric] Initial guess rate
     # @return [Rate] the internal rate of return
     # @example
     #   @transactions = []
@@ -95,7 +95,7 @@ module Finance
     #   @transactions << Transaction.new(  600, :date => Time.new(1995,01,01))
     #   Finance::Cashflow.new(@transactions).xirr(0.6) #=> Rate("0.024851", :apr, :compounds => :annually)
     # @api public
-    def xirr(iterations=100, guess=nil)
+    def xirr(guess=nil)
       # Make sure we have a valid sequence of cash flows.
       positives, negatives = @__cash_flows.partition{ |t| t.amount >= 0 }
       if positives.empty? || negatives.empty?
