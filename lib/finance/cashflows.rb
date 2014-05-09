@@ -75,10 +75,10 @@ module Finance
     # @see http://en.wikipedia.org/wiki/Net_present_value
     # @api public
     def npv(rate)
-      @__cash_flows.collect! { |entry| Flt::DecNum.new(entry.to_s) }
+      cashflow = @__cash_flows.collect { |entry| Flt::DecNum.new(entry.to_s) }
 
       rate, total = Flt::DecNum.new(rate.to_s), Flt::DecNum.new(0.to_s)
-      @__cash_flows.each_with_index do |cashflow, index|
+      cashflow.each_with_index do |cashflow, index|
         total += cashflow / (1 + rate) ** index
       end
 
@@ -102,13 +102,8 @@ module Finance
         raise ArgumentError, "Calculation does not converge."
       end
 
-<<<<<<< HEAD
       func = Function.new(@__cash_flows, :xnpv)
-      rate = guess.nil? ? [ func.one ] : [ guess ]
-=======
-      func = Function.new(self, :xnpv)
       rate = guess.nil? ? [ func.one ] : [ guess.to_f ]
->>>>>>> Added Guess rate to XIRR and XIRR
       nlsolve( func, rate )
       Rate.new(rate[0], :apr, :compounds => :annually)
     end
