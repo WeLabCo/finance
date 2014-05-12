@@ -4,9 +4,7 @@ describe "Cashflows" do
   describe "an array of numeric cashflows" do
     it "should have an Internal Rate of Return" do
       assert_equal D("0.143"), Finance::Cashflow.new([-4000,1200,1410,1875,1050]).irr.round(3)
-      assert_raises(ArgumentError) do
-        Finance::Cashflow.new([10,20,30]).irr
-      end
+      assert_raises(ArgumentError) { Finance::Cashflow.new([10,20,30]).irr }
     end
 
     it "should have a Net Present Value" do
@@ -38,20 +36,19 @@ describe "Cashflows" do
       @transactions = []
       @transactions << Transaction.new(-1000, date: Time.new(1957,1,1))
       @transactions << Transaction.new(390000, date: Time.new(2013,1,1))
+      @cash_flow = Finance::Cashflow.new(@transactions)
     end
 
     it "should fail to calculate with default guess (1.0)" do
-      assert_equal '-9999999999998'.to_i, @transactions.xirr.apr.to_i
+      assert_equal '-9999999999998'.to_i, @cash_flow.xirr.apr.to_i
     end
 
     it 'should calculate correct rate with new guess (0.1)' do
-      assert_equal '0.112340'.to_f, @transactions.xirr(0.1).apr.round(6).to_f
+      assert_equal '0.11234'.to_f, @cash_flow.xirr(0.1).apr.round(5).to_f
     end
 
     it 'should not allow non-numeric guesses' do
-      assert_raises(ArgumentError) { @transactions.xirr("error")}
+      assert_raises(ArgumentError) { @cash_flow.xirr("error")}
     end
-
   end
-
 end
