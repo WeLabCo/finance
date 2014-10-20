@@ -46,7 +46,7 @@ module Finance
     # calculate the internal rate of return for a sequence of cash flows
     # @return [DecNum] the internal rate of return
     # @example
-    #   [-4000,1200,1410,1875,1050].irr #=> 0.143
+    #   Finance::Cashflow.new([-4000,1200,1410,1875,1050]).irr #=> 0.143
     # @see http://en.wikipedia.org/wiki/Internal_rate_of_return
     # @api public
     def irr
@@ -70,7 +70,7 @@ module Finance
     # @return [DecNum] the net present value
     # @param [Numeric] rate the discount rate to be applied
     # @example
-    #   [-100.0, 60, 60, 60].npv(0.1) #=> 49.211
+    #   Finance::Cashflow.new([-100.0, 60, 60, 60]).npv(0.1) #=> 49.211
     # @see http://en.wikipedia.org/wiki/Net_present_value
     # @api public
     def npv(rate)
@@ -91,7 +91,7 @@ module Finance
     #   @transactions << Transaction.new(-1000, :date => Time.new(1985,01,01))
     #   @transactions << Transaction.new(  600, :date => Time.new(1990,01,01))
     #   @transactions << Transaction.new(  600, :date => Time.new(1995,01,01))
-    #   @transactions.xirr(0.6) #=> Rate("0.024851", :apr, :compounds => :annually)
+    #   Finance::Cashflow.new(@transactions).xirr(0.6) #=> Rate("0.024851", :apr, :compounds => :annually)
     # @api public
     def xirr(iterations=100)
       # Make sure we have a valid sequence of cash flows.
