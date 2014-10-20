@@ -8,7 +8,8 @@ include Newton
 module Finance
   # Provides methods for working with cash flows (collections of transactions)
   # @api public
-  module Cashflow
+  class Cashflow
+    include Enumerable
     # Base class for working with Newton's Method.
     # @api private
     class Function
@@ -27,7 +28,7 @@ module Finance
       end
 
       def initialize(transactions, function)
-        @transactions = transactions
+        @transactions = Finance::Cashflow.new(transactions)
         @function = function
       end
 
@@ -37,42 +38,46 @@ module Finance
       end
     end
 
+
+    def initialize(cash_flows)
+      @__cash_flows = Array(cash_flows)
+    end
+
     # calculate the internal rate of return for a sequence of cash flows
     # @return [DecNum] the internal rate of return
     # @example
-    #   [-4000,1200,1410,1875,1050].irr #=> 0.143
+    #   Finance::Cashflow.new([-4000,1200,1410,1875,1050]).irr #=> 0.143
     # @see http://en.wikipedia.org/wiki/Internal_rate_of_return
     # @api public
     def irr
       # Make sure we have a valid sequence of cash flows.
-      positives, negatives = self.partition{ |i| i >= 0 }
+      positives, negatives = @__cash_flows.partition{ |i| i >= 0 }
       if positives.empty? || negatives.empty?
         raise ArgumentError, "Calculation does not converge."
       end
 
-      func = Function.new(self, :npv)
+      func = Function.new(@__cash_flows, :npv)
       rate = [ func.one ]
       nlsolve( func, rate )
       rate[0]
     end
 
-    def method_missing(name, *args, &block)
-      return self.inject(:+) if name.to_s == "sum"
-      super
+    def sum
+      @__cash_flows.inject(:+)
     end
 
     # calculate the net present value of a sequence of cash flows
     # @return [DecNum] the net present value
     # @param [Numeric] rate the discount rate to be applied
     # @example
-    #   [-100.0, 60, 60, 60].npv(0.1) #=> 49.211
+    #   Finance::Cashflow.new([-100.0, 60, 60, 60]).npv(0.1) #=> 49.211
     # @see http://en.wikipedia.org/wiki/Net_present_value
     # @api public
     def npv(rate)
-      self.collect! { |entry| Flt::DecNum.new(entry.to_s) }
+      @__cash_flows.collect! { |entry| Flt::DecNum.new(entry.to_s) }
 
       rate, total = Flt::DecNum.new(rate.to_s), Flt::DecNum.new(0.to_s)
-      self.each_with_index do |cashflow, index|
+      @__cash_flows.each_with_index do |cashflow, index|
         total += cashflow / (1 + rate) ** index
       end
 
@@ -86,16 +91,16 @@ module Finance
     #   @transactions << Transaction.new(-1000, :date => Time.new(1985,01,01))
     #   @transactions << Transaction.new(  600, :date => Time.new(1990,01,01))
     #   @transactions << Transaction.new(  600, :date => Time.new(1995,01,01))
-    #   @transactions.xirr(0.6) #=> Rate("0.024851", :apr, :compounds => :annually)
+    #   Finance::Cashflow.new(@transactions).xirr(0.6) #=> Rate("0.024851", :apr, :compounds => :annually)
     # @api public
     def xirr(iterations=100)
       # Make sure we have a valid sequence of cash flows.
-      positives, negatives = self.partition{ |t| t.amount >= 0 }
+      positives, negatives = @__cash_flows.partition{ |t| t.amount >= 0 }
       if positives.empty? || negatives.empty?
         raise ArgumentError, "Calculation does not converge."
       end
 
-      func = Function.new(self, :xnpv)
+      func = Function.new(@__cash_flows, :xnpv)
       rate = [ func.one ]
       nlsolve( func, rate )
       Rate.new(rate[0], :apr, :compounds => :annually)
@@ -112,16 +117,21 @@ module Finance
     # @api public
     def xnpv(rate)
       rate  = Flt::DecNum.new(rate.to_s)
-      start = self[0].date
+      start = @__cash_flows[0].date
 
-      self.inject(0) do |sum, t|
+      @__cash_flows.inject(0) do |sum, t|
         n = t.amount / ( (1 + rate) ** ((t.date-start) / Flt::DecNum.new(31536000.to_s))) # 365 * 86400
         sum + n
       end
     end
-  end
-end
 
-class Array
-  include Finance::Cashflow
+    def each(&block)
+      @__cash_flows.each { |cash_flow| block.call(cash_flow) }
+    end
+
+    def [](*args)
+      cash_flows = @__cash_flows[*args]
+      Finance::Cashflow.new(cash_flows)
+    end
+  end
 end
