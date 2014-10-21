@@ -17,5 +17,4 @@ describe "Cashflows" do
       assert_equal '1.0e-9', Finance.config.eps
     end
   end
-
 end

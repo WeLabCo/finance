@@ -7,6 +7,15 @@ describe "Cashflows" do
       assert_raises(ArgumentError) { Finance::Cashflow.new([10,20,30]).irr }
     end
 
+    it 'should not generate negative values for large number of cashflows' do
+     amount= -28350.0
+     flows = []
+     35.times { flows << 1175.1 }
+     flows << 1174.96
+     irr = Finance::Cashflow.new([amount, *flows]).irr(0.5)
+     assert(irr > 0, 'IRR should be greater than total sum')
+    end
+
     it "should have a Net Present Value" do
       assert_equal D("49.211"), Finance::Cashflow.new([-100.0, 60, 60, 60]).npv(0.1).round(3)
     end
@@ -40,7 +49,7 @@ describe "Cashflows" do
     end
 
     it "should fail to calculate with default guess (1.0)" do
-      assert_equal '-9999999999998'.to_i, @cash_flow.xirr.apr.to_i
+      assert_equal '-9999999999998'.to_i, @cash_flow.xirr(1.0).apr.to_i
     end
 
     it 'should calculate correct rate with new guess (0.1)' do
