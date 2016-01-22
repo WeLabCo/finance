@@ -1,5 +1,4 @@
 require 'rubygems'
-require 'rake'
 
 SPEC = Gem::Specification.new do |s|
   s.name = "finance"
@@ -17,7 +16,7 @@ SPEC = Gem::Specification.new do |s|
   s.add_dependency 'activesupport', '>= 3.2.0'
   s.add_dependency 'rake'
   s.add_development_dependency 'minitest', '>= 4.7.5'
-  s.files = FileList['README.md', 'COPYING', 'COPYING.LESSER', 'HISTORY', 'lib/**/*.rb', 'test/**/*.rb'].to_a
+  s.files = ['README.md', 'COPYING', 'COPYING.LESSER', 'HISTORY', Dir.glob('lib/**/*.rb'), Dir.glob('test/**/*.rb')].flatten
 
   s.has_rdoc = true
   s.extra_rdoc_files = ['README.md', 'COPYING', 'COPYING.LESSER', 'HISTORY']
